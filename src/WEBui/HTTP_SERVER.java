@@ -5,11 +5,14 @@ package src.WEBui;
      * @version 1.00
      */
 
+import src.SharedInfo;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 // O nome original era: myHTTPServer
-    public class Coisa_Bonita extends Thread {
+    public class HTTP_SERVER extends Thread {
+        public SharedInfo shared;
 
         static final String HTML_START =
                 "<html>" +
@@ -25,8 +28,9 @@ import java.util.*;
         DataOutputStream outToClient = null;
 
 
-        public Coisa_Bonita(Socket client) {
+        public HTTP_SERVER(Socket client, SharedInfo shared) {
             connectedClient = client;
+            this.shared = shared;
         }
 
         public void run() {
@@ -49,13 +53,13 @@ import java.util.*;
                 StringBuffer responseBuffer = new StringBuffer();
                 responseBuffer.append("<b> This is the HTTP Server Home Page.... </b><BR>");
                 responseBuffer.append("<b> Olá Amigos.... </b><BR>");
-                responseBuffer.append("The HTTP Client request is ....<BR>");
-
+                //responseBuffer.append("The HTTP Client request is ....<BR>");
+                RenderInfo.renderMap(shared, responseBuffer);
                 System.out.println("The HTTP request string is ....");
                 while (inFromClient.ready())
                 {
                     // Read the HTTP complete HTTP Query
-                    responseBuffer.append(requestString + "<BR>");
+                    //responseBuffer.append(requestString + "<BR>");
                     System.out.println(requestString);
                     requestString = inFromClient.readLine();
                 }
@@ -106,7 +110,7 @@ import java.util.*;
                     contentTypeLine = "Content-Type: \r\n";
             }
             else {
-                responseString = Coisa_Bonita.HTML_START + responseString + Coisa_Bonita.HTML_END;
+                responseString = HTTP_SERVER.HTML_START + responseString + HTTP_SERVER.HTML_END;
                 contentLengthLine = "Content-Length: " + responseString.length() + "\r\n";
             }
 
@@ -131,17 +135,6 @@ import java.util.*;
                 out.write(buffer, 0, bytesRead);
             }
             fin.close();
-        }
-
-        public static void main (String args[]) throws Exception {
-
-            ServerSocket Server = new ServerSocket (5000, 10, InetAddress.getByName("127.0.0.1"));
-            System.out.println ("TCPServer Waiting for client on port 5000");
-
-            while(true) {
-                Socket connected = Server.accept();
-                (new Coisa_Bonita(connected)).start();
-            }
         }
     }
 
