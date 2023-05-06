@@ -3,20 +3,21 @@ from simple_http_server import route, server
 
 from scapy.all import *
 from scapy.layers.dot11 import Dot11
+from AcessPoint import AcessPoint
+from render_html import render_main_page
 
-redes = {
-	"Olá": "Adeus",
-	"Olá2": "Adeus1",
-	"Olá3": "Adeus2",
-	"Olá4": "Adeus3",
-}
+AP1 =  AcessPoint("NOS-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP2 =  AcessPoint("MEO-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP3 =  AcessPoint("Vodafone-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP4 =  AcessPoint("MAE-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
 
+available_AP = [AP1, AP2, AP3, AP4]
 
 def _render_map():
 	result = ""
 	result += "<ul>"
-	for key in redes:
-		result += "<li><a href=\"/queijo\">{key} - {value}</li>".format(key=key, value=redes[key])
+	for AP in available_AP:
+		result += f"<li><a href=\"/queijo\">{AP.ssid} - {AP.band}</li>"
 	result += " </ul>\n"
 	return result
 
@@ -37,6 +38,7 @@ def _style():
 
 @route("/")
 def _main_page():
+	return render_main_page(available_AP)
 	return "<html>\n" \
 		+ _style() + \
 		"""
