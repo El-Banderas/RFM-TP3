@@ -10,47 +10,45 @@ header = """<html>
 def _style():
 	return """<head>
 			<style>
-.flex-container2 {
-  display: flex;
-  flex-direction: row;
-  flex-flow: wrap;
-flex-wrap: wrap
-  }
-.flex-container {
-  display: flex;
-  flex-wrap: nowrap;
-  flex-direction: column;
-  flex-flow: column;
-  background-color: DodgerBlue;
+section {
+  display: table;
+  width: 100%;
+  border-style: solid;
 }
 
-.flex-container > div {
-  background-color: #f1f1f1;
-  margin: 10px;
-  text-align: center;
-  font-size: 30px;
+section > * {
+  display: table-row;
 }
-.lineInterior {
-  background-color: cyan;
-  margin: 10px;
-  font-size: 30px;
+
+section .col {
+  display: table-cell;
 }
 </style>
 </head>"""
 def line_AP(AP : AcessPoint):
-    return f""" <div class=\"flex-container2\"> <a href=\"/queijo\">
-                <div class=\"lineInterior\"> {AP.ssid}</div>
-                <div class=\"lineInterior\"> {AP.bssid}</div>
-                <div class=\"lineInterior\"> {AP.signal}</div>
-                <div class=\"lineInterior\"> {AP.band}</div>
-                <div class=\"lineInterior\"> {AP.channel}</div>
-    </div>"""
+    return f""" <div class=\"row\"> 
+                    <div class=\"col\"> {AP.ssid}</div>
+                    <div class=\"col\"> {AP.bssid}</div>
+                    <div class=\"col\"> {AP.signal}</div>
+                    <div class=\"col\"> {AP.band}</div>
+                    <div class=\"col\"> {AP.channel}</div>
+                </div>"""
+def header_table():
+     return f"""
+           <header>
+                    <div class="col">SSID</div>
+                    <div class="col">BSSID</div>
+                    <div class="col">Signal</div>
+                    <div class="col">Bandwith</div>
+                    <div class="col">Channel</div>
+            </header>
+        """
 
 def table_APS(APs : list[AcessPoint]):
-    result = "<div class=\"flex-container\">"
+    result = "<section>" + header_table()
     for elem in APs:
         result += line_AP(elem)
-    result += " </div>\n"
+    result += " </section>\n"
     return result
 
 def body(APs : list[AcessPoint]):
