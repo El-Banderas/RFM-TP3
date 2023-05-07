@@ -5,6 +5,8 @@ from scapy.all import *
 from scapy.layers.dot11 import Dot11
 from AcessPoint import AcessPoint
 from render_html import render_main_page
+from refresh_points import Update_APS
+import signal
 
 AP1 =  AcessPoint("NOS-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
 AP2 =  AcessPoint("MEO-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
@@ -12,6 +14,7 @@ AP3 =  AcessPoint("Vodafone-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
 AP4 =  AcessPoint("MAE-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
 
 available_AP = [AP1, AP2, AP3, AP4]
+refresh_seconds = 5
 
 def _render_map():
 	result = ""
@@ -22,7 +25,7 @@ def _render_map():
 	return result
 
 def _style():
-	return """<head>
+	return f"<head><meta http-equiv=\"refresh\" content=\"{refresh_seconds}\">"+"""
 			<style>
 			body{
 				margin: auto;
@@ -87,4 +90,20 @@ def _packet_handler(pkt):
 # print(list(devices))
 
 # print(_main_page())
-server.start(port=8080)
+'''
+is_running = True
+
+def handler(signum, frame):
+	msg = "Ctrl-c was pressed\n"
+	print(msg, end="", flush=True)
+	is_running = False
+	exit(1)
+ 
+signal.signal(signal.SIGINT, handler)
+'''
+
+if __name__ == "__main__":
+#	thread = Update_APS(available_AP,  refresh_seconds)
+#	thread.daemon = True
+#	thread.start()
+	server.start(port=8080)

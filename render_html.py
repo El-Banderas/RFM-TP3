@@ -10,12 +10,23 @@ header = """<html>
 def _style():
 	return """<head>
 			<style>
+.title2{
+text-align: center;
+font-size: 30px;
+  font-weight: bold;
+   margin-top: 30px;
+  margin-bottom: 30px;
+}
 section {
   display: table;
+   margin: 25px 50px 75px 50px;
   width: 100%;
   border-style: solid;
 }
-
+.MiTable {
+ margin: auto;
+  width: 60%;
+}
 section > * {
   display: table-row;
 }
@@ -27,7 +38,7 @@ section .col {
 </head>"""
 def line_AP(AP : AcessPoint):
     return f""" <div class=\"row\"> 
-                    <div class=\"col\"> {AP.ssid}</div>
+                    <div class=\"col\"> <a href=\"/queijo\">{AP.ssid}</a></div>
                     <div class=\"col\"> {AP.bssid}</div>
                     <div class=\"col\"> {AP.signal}</div>
                     <div class=\"col\"> {AP.band}</div>
@@ -45,14 +56,14 @@ def header_table():
         """
 
 def table_APS(APs : list[AcessPoint]):
-    result = "<section>" + header_table()
+    result = "<section class=\"MiTable\">" + header_table()
     for elem in APs:
         result += line_AP(elem)
     result += " </section>\n"
     return result
 
 def body(APs : list[AcessPoint]):
-     return "<body>Olá?" + table_APS(APs) + "</body>"
+     return "<body><div class=\"title2\">Current Access Points near you</div>" + table_APS(APs) + "</body>"
 
 def render_main_page(APs : list[AcessPoint]):
     return "<html>" + _style() + header + body(APs) + "</html>"
