@@ -35,8 +35,7 @@ def update():
 		time.sleep(refresh_seconds)
 
 	except RuntimeError:
-		# Retry
-		update()
+		pass
 
 
 def handler(signum, frame):
