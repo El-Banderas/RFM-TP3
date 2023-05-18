@@ -8,13 +8,14 @@ from render_html import render_main_page
 from refresh_points import Update_APS
 import signal
 
-AP1 =  AcessPoint("NOS-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
-AP2 =  AcessPoint("MEO-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
-AP3 =  AcessPoint("Vodafone-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
-AP4 =  AcessPoint("MAE-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP1 = AcessPoint("NOS-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP2 = AcessPoint("MEO-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP3 = AcessPoint("Vodafone-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+AP4 = AcessPoint("MAE-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
 
 available_AP = [AP1, AP2, AP3, AP4]
 refresh_seconds = 5
+
 
 def _render_map():
 	result = ""
@@ -24,8 +25,9 @@ def _render_map():
 	result += " </ul>\n"
 	return result
 
+
 def _style():
-	return f"<head><meta http-equiv=\"refresh\" content=\"{refresh_seconds}\">"+"""
+	return f"<head><meta http-equiv=\"refresh\" content=\"{refresh_seconds}\">" + """
 			<style>
 			body{
 				margin: auto;
@@ -39,6 +41,7 @@ def _style():
 </style>
 </head>"""
 
+
 @route("/")
 def _main_page():
 	return render_main_page(available_AP)
@@ -48,13 +51,15 @@ def _main_page():
 			<title>HTTP Server in java</title>
 			<body>
 		""" \
-			"<b> This is the HTTP Server Home Page.... </b><BR>\n" \
-			"<b> Olá Amigos.... </b><BR>\n" \
-			+ _render_map() + \
+		"<b> This is the HTTP Server Home Page.... </b><BR>\n" \
+		"<b> Olá Amigos.... </b><BR>\n" \
+		+ _render_map() + \
 		"""
 			</body>
 		</html>
 		"""
+
+
 @route("/queijo")
 def _main_page1():
 	return "<html>\n" \
@@ -63,13 +68,12 @@ def _main_page1():
 			<title>Queijo</title>
 			<body>
 		""" \
-			"<b> This is the HTTP Server Home Page.... </b><BR>\n" \
-			"<b> Olá Amigos queijo.... </b><BR>\n" \
+		"<b> This is the HTTP Server Home Page.... </b><BR>\n" \
+		"<b> Olá Amigos queijo.... </b><BR>\n" \
 		"""
 			</body>
 		</html>
 		"""
-
 
 
 # netsh wlan show interfaces
@@ -103,7 +107,7 @@ signal.signal(signal.SIGINT, handler)
 '''
 
 if __name__ == "__main__":
-#	thread = Update_APS(available_AP,  refresh_seconds)
-#	thread.daemon = True
-#	thread.start()
+	#	thread = Update_APS(available_AP,  refresh_seconds)
+	#	thread.daemon = True
+	#	thread.start()
 	server.start(port=8080)
