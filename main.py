@@ -1,113 +1,89 @@
 # https://pypi.org/project/simple-http-server/
-from simple_http_server import route, server
-
-from scapy.all import *
-from scapy.layers.dot11 import Dot11
-from AcessPoint import AcessPoint
-from render_html import render_main_page
-from refresh_points import Update_APS
+from simple_http_server import route, server, PathValue, request_map
+import simple_http_server.logger
 import signal
 
-AP1 = AcessPoint("NOS-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
-AP2 = AcessPoint("MEO-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
-AP3 = AcessPoint("Vodafone-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
-AP4 = AcessPoint("MAE-asdd", "88:88:88:as:ds:ds", "65%", "2.4Ghz", "11")
+import winwifi
+from threading import Thread
+import time
 
-available_AP = [AP1, AP2, AP3, AP4]
+from winwifi import WiFiAp
+
+from AccessPoint import AccessPoint
+from html_stuff import render_main_page, render_ap_details
+
+available_aps = {}
 refresh_seconds = 5
+wifi = None
+uthread = None
+sthread = None
+is_running = False
 
 
-def _render_map():
-	result = ""
-	result += "<ul>"
-	for AP in available_AP:
-		result += f"<li><a href=\"/queijo\">{AP.ssid} - {AP.band}</li>"
-	result += " </ul>\n"
-	return result
+def update():
+	global available_aps, wifi
 
+	try:
+		available_aps_tmp = {}  # buffer
 
-def _style():
-	return f"<head><meta http-equiv=\"refresh\" content=\"{refresh_seconds}\">" + """
-			<style>
-			body{
-				margin: auto;
-				width: 50%;
-			}
-			li{
-				list-style-type: none;
-				margin: 0;
-				border: 5px solid black;
-			}
-</style>
-</head>"""
+		for ap in wifi.scan():
+			new_ap = AccessPoint(ap.ssid, ap.auth, ap.encrypt, ap.bssid, ap.strength, "?", "?", ap.raw_data)
+			available_aps_tmp[ap.ssid] = new_ap
 
+		available_aps = available_aps_tmp  # write full list
 
-@route("/")
-def _main_page():
-	return render_main_page(available_AP)
-	return "<html>\n" \
-		+ _style() + \
-		"""
-			<title>HTTP Server in java</title>
-			<body>
-		""" \
-		"<b> This is the HTTP Server Home Page.... </b><BR>\n" \
-		"<b> Olá Amigos.... </b><BR>\n" \
-		+ _render_map() + \
-		"""
-			</body>
-		</html>
-		"""
+		time.sleep(refresh_seconds)
 
+	except RuntimeError:
+		# Retry
+		update()
 
-@route("/queijo")
-def _main_page1():
-	return "<html>\n" \
-		+ _style() + \
-		"""
-			<title>Queijo</title>
-			<body>
-		""" \
-		"<b> This is the HTTP Server Home Page.... </b><BR>\n" \
-		"<b> Olá Amigos queijo.... </b><BR>\n" \
-		"""
-			</body>
-		</html>
-		"""
-
-
-# netsh wlan show interfaces
-IFACE_NAME = "WiFi"
-devices = set()
-
-
-def _packet_handler(pkt):
-	if pkt.haslayer(Dot11):
-		dot11_layer = pkt.getlayer(Dot11)
-
-		if dot11_layer.addr2 and (dot11_layer.addr2 not in devices):
-			devices.add(dot11_layer.addr2)
-			print(len(devices), dot11_layer.addr2, dot11_layer.payload.name)
-
-
-# sniff(iface=IFACE_NAME, count=100, prn=_packet_handler)
-# print(list(devices))
-
-# print(_main_page())
-'''
-is_running = True
 
 def handler(signum, frame):
-	msg = "Ctrl-c was pressed\n"
-	print(msg, end="", flush=True)
-	is_running = False
-	exit(1)
- 
-signal.signal(signal.SIGINT, handler)
-'''
+	global is_running
+	if is_running:
+		print("Stopping...")
+		is_running = False
+		server.stop()
+		#sthread.join()
+		#exit(1)
+
+
+@request_map("/", method="GET")
+def _root():
+	return render_main_page(available_aps.values())
+
+
+@request_map("/{ap_ssid}", method="GET")
+def _root_xxx(ap_ssid=PathValue()):
+	if ap_ssid in available_aps:
+		return render_ap_details(available_aps[ap_ssid], refresh_seconds)
+	else:
+		return {"code": 404, "message": f"AP with SSID {ap_ssid} not found!"}
+
 
 if __name__ == "__main__":
-	#	thread = Update_APS(available_AP,  refresh_seconds)
-	#	thread.daemon = True
-	#	thread.start()
-	server.start(port=8080)
+	simple_http_server.logger.set_level("ERROR")  # Doesn't have critical -_-
+
+	# Initialize WinWiFi
+	wifi = winwifi.WinWiFi()
+
+	# temporary
+	ap = wifi.scan()[0]
+	print()
+	print(ap.__dict__.keys())
+	print(ap.__dir__())
+	print()
+
+	update()
+
+	print("Starting server... ", end="")
+	sthread = Thread(target=server.start, kwargs={"port": 8080}, daemon=False)
+	sthread.start()
+	print("OK")
+
+	is_running = True
+	signal.signal(signal.SIGINT, handler)
+
+	while is_running:
+		update()
