@@ -67,6 +67,7 @@ if __name__ == "__main__":
 	# Initialize WinWiFi
 	wifi = winwifi.WinWiFi()
 
+	# netsh wlan show all
 	# temporary
 	ap = wifi.scan()[0]
 	print()
