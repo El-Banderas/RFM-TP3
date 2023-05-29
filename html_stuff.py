@@ -11,6 +11,9 @@
 """
 
 
+from collections import OrderedDict
+
+
 def _bssid_details_style(refresh_seconds):
 	return f"""
 		<head>
@@ -90,6 +93,13 @@ _ssid_details_style = f"""
 				margin-top: 30px;
 				margin-bottom: 30px;
 			}}
+			.title3 {{
+				text-align: center;
+				font-size: 25px;
+				font-weight: 600;
+				margin-top: 30px;
+				margin-bottom: 30px;
+			}}
 			section {{
 				display: table;
 				margin: 25px 50px 75px 50px;
@@ -165,6 +175,8 @@ _main_header = f"""
 """
 
 _main_style = f"""
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
 	<head>
 		<style>
 			.title2 {{
@@ -189,6 +201,10 @@ _main_style = f"""
 			}}
 			section .col {{
 				display: table-cell;
+			}}
+			.MyGraph {{
+				margin: 25px 50px 75px 50px;
+				width: 100%;
 			}}
 		</style>
 	</head>
@@ -225,9 +241,87 @@ def _main_table(access_points):
 	result += " </section>\n"
 	return result
 
+# Count the frequency of utilization of channels
+def CountFrequency(my_list):
+ 
+    # Creating an empty dictionary
+	freq = {}
+	for item in my_list:
+		if (item in freq):
+			freq[item] += 1
+		else:
+			freq[item] = 1
+	'''
+	channels = list(freq.keys())
+	channels.sort()
+	print("1")
+	print(channels)
+	print("---")
+	sorted_dict = {i: freq[i] for i in channels}
+	'''
+	sorted_dict = OrderedDict(sorted(freq.items())) 
+	res2_4 = []
+	res_5 = []
+	for key, value in sorted_dict.items():
+		if int(key) <= 11:
+			res2_4.append({"x": int(key), "y": value})
+		else:
+			res_5.append({"x": int(key), "y": value})
+
+	#res = (list(sorted_dict.keys()), list(sorted_dict.values()))
+        
+	return res2_4, res_5
+
+def _main_graph_APS(access_points):
+	used_channels = map(lambda ap: ap.channel,  access_points)
+	freq2_4, freq_5 = CountFrequency(used_channels)
+
+
+		
+	return f"""
+	<div class=\"MiGraph\">
+				<div class=\"title3\">Channel utilization:</div>
+				<canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+
+
+<script>
+
+new Chart(\"myChart\", {{
+  type: \"scatter\",
+  data: {{
+    datasets: [{{
+		 label: \'Freq 2.4GHz\',
+      pointRadius: 4,
+      pointBackgroundColor: \"rgb(0,0,255)\",
+      data: {freq2_4},
+    }},
+{{
+		 label: \'Freq 5GHz\',
+      pointRadius: 4,
+      pointBackgroundColor: \"rgb(255,0,255)\",
+      data: {freq_5},
+    }},
+
+	]
+  }},
+  options: {{
+    legend: {{display: true}},
+
+      scales: {{
+        yAxes: [{{
+            ticks: {{
+                beginAtZero: true
+            }}
+        }}]
+    }}
+  }}
+}});
+</script>
+
+	</div>"""
 
 def _main_body(access_points):
-	return "<body><div class=\"title2\">Current Access Points near you</div>" + _main_table(access_points) + "</body>"
+	return "<body><div class=\"title2\">Current Access Points near you</div>" + _main_table(access_points) + _main_graph_APS(access_points)+ "</body>"
 
 
 def render_main_page(available_aps):

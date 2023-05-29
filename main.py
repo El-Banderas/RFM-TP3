@@ -41,8 +41,12 @@ def process(up_ap: WiFiAp):
 
 	# parse Network type
 	match = re.search(r"^Network type +: (?P<NT>\w+)\s+(?P<remaining>(?:.|\s)*)", raw)
-	nt = match.group("NT")
-	raw = match.group("remaining")
+	if match is not None:
+		nt = match.group("NT")
+		raw = match.group("remaining")
+	else:
+		nt = "---"
+		raw = "---"
 
 	# BSSIDs
 	sbssids = raw.split("BSSID")[1:]
