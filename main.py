@@ -10,6 +10,9 @@ import time
 from winwifi import WiFiAp
 import re
 
+import json
+import datetime
+
 from AccessPoint import AccessPoint
 from html_stuff import render_main_page, render_ssid_details, render_bssid_details
 
@@ -24,6 +27,7 @@ ssid2   -> bssid4 -> ap4
 """
 
 refresh_seconds = 5
+write_in = 0
 wifi = None
 uthread = None
 sthread = None
@@ -36,7 +40,8 @@ def process(up_ap: WiFiAp):
 
 	# parse SSID
 	match = re.search(r"^SSID +\d+ +: (?P<SSID>[\w-]+)?\s+(?P<remaining>(?:.|\s)*)", raw)
-	ssid = match.group("SSID"); ssid = ssid if ssid else "-hidden-"
+	ssid = match.group("SSID");
+	ssid = ssid if ssid else "-hidden-"
 	raw = match.group("remaining")
 
 	# parse Network type
@@ -66,25 +71,41 @@ def process(up_ap: WiFiAp):
 		channel = m.group("channel")
 
 		kwargs = {
-				"SSID": ssid,
-				"Network type": nt,
-				"Authentication": up_ap.auth,
-				"Encryption": up_ap.encrypt,
+			"SSID": ssid,
+			"Network type": nt,
+			"Authentication": up_ap.auth,
+			"Encryption": up_ap.encrypt,
 
-				"BSSID": bssid,
-				"Signal": ssignal,
-				"Radio type": radio_type,
-				"Channel": channel,
-				"Basic Rates (Mbps)": [],
-				"Other Rates (Mbps)": [],
+			"BSSID": bssid,
+			"Signal": ssignal,
+			"Radio type": radio_type,
+			"Channel": channel,
+			"Basic Rates (Mbps)": [],
+			"Other Rates (Mbps)": [],
 		}
 		result.append(AccessPoint(kwargs))
 
 	return result
 
 
+def save():
+	global available_aps
+
+	final_dict = available_aps
+	for ssid in final_dict:
+		for bssid in final_dict[ssid]:
+			final_dict[ssid][bssid] = final_dict[ssid][bssid].__dict__()
+
+	jsons = json.dumps(final_dict)
+	now = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+	with open(f"wlanreport-{now}.json", "w") as f:
+		f.write(jsons)
+		f.close()
+
+
 def update():
-	global available_aps, wifi
+	global available_aps, wifi, write_in
 
 	try:
 		available_aps_tmp = {}  # buffer
@@ -99,6 +120,12 @@ def update():
 				available_aps_tmp[p_ap.ssid][p_ap.bssidf] = p_ap
 
 		available_aps = available_aps_tmp  # write full list
+
+		if write_in == 0:
+			write_in = 12
+			save()
+		else:
+			write_in -= 1
 
 		time.sleep(refresh_seconds)
 
@@ -122,7 +149,6 @@ def _root():
 # @request_map("/{ap_ssid}", method="GET")
 # http://127.0.0.1:8080/MATOS-MESH
 def _root_xxx(ap_ssid=PathValue()):
-
 	if ap_ssid not in available_aps:
 		return {"code": 404, "message": f"SSID {ap_ssid} not found!"}
 
@@ -134,7 +160,6 @@ def _root_xxx(ap_ssid=PathValue()):
 # or
 # http://127.0.0.1:8080/MATOS-MESH/9e.a2.f4.75.dc.bf
 def _root_xxx_xxx(path_val=PathValue()):
-
 	# {ap_ssid} - show ssid details
 	if '/' not in path_val:
 		return _root_xxx(path_val)
