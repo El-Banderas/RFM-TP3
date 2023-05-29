@@ -186,6 +186,13 @@ _main_style = f"""
 				margin-top: 30px;
 				margin-bottom: 30px;
 			}}
+			.title3 {{
+				text-align: center;
+				font-size: 30px;
+				font-weight: 600;
+				margin-top: 30px;
+				margin-bottom: 30px;
+			}}
 			section {{
 				display: table;
 				margin: 25px 50px 75px 50px;
@@ -202,9 +209,9 @@ _main_style = f"""
 			section .col {{
 				display: table-cell;
 			}}
-			.MyGraph {{
-				margin: 25px 50px 75px 50px;
-				width: 100%;
+			.myGraph {{
+				margin: auto;
+				width: 50%;
 			}}
 		</style>
 	</head>
@@ -263,7 +270,7 @@ def CountFrequency(my_list):
 	res2_4 = []
 	res_5 = []
 	for key, value in sorted_dict.items():
-		if int(key) <= 11:
+		if int(key) <= 13:
 			res2_4.append({"x": int(key), "y": value})
 		else:
 			res_5.append({"x": int(key), "y": value})
@@ -279,7 +286,7 @@ def _main_graph_APS(access_points):
 
 		
 	return f"""
-	<div class=\"MiGraph\">
+	<div class=\"myGraph\">
 				<div class=\"title3\">Channel utilization:</div>
 				<canvas id="myChart" style="width:100%;max-width:700px"></canvas>
 
@@ -293,12 +300,14 @@ new Chart(\"myChart\", {{
 		 label: \'Freq 2.4GHz\',
       pointRadius: 4,
       pointBackgroundColor: \"rgb(0,0,255)\",
+	  backgroundColor: \"rgb(0,0,255)\",
       data: {freq2_4},
     }},
 {{
 		 label: \'Freq 5GHz\',
       pointRadius: 4,
       pointBackgroundColor: \"rgb(255,0,255)\",
+	  backgroundColor: \"rgb(255,0,255)\",
       data: {freq_5},
     }},
 
