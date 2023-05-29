@@ -213,14 +213,32 @@ _main_style = f"""
 				margin: auto;
 				width: 50%;
 			}}
+			.rowRed {{
+				background: rgb(250, 0, 0, 0.5);
+			}}
+			.rowGreen {{
+				background: rgb(0, 250, 0, 0.5);
+			}}
+			.rowYellow {{
+				background: rgb(255, 255, 0, 0.5);
+			}}
 		</style>
 	</head>
 """
 
 
 def _main_table_line(ap):
+	color = ""
+	strength = int(ap.strength[:-1])
+	if strength < 40:
+		color = "rowRed"
+	elif strength < 70:
+		color = "rowYellow"
+	else:
+		color = "rowGreen"
+
 	return f"""
-		<div class=\"row\"> 
+		<div class=\"{color}\"> 
 			<div class=\"col\"> <a href=\"/{ap.ssid}\"> {ap.ssid} </a> </div>
 			<div class=\"col\"> <a href=\"/{ap.ssid}/{ap.bssidf}\"> {ap.bssid} </a> </div>
 			<div class=\"col\"> {ap.strength} </div>
