@@ -20,8 +20,11 @@ def _bssid_details_style(refresh_seconds):
 			<!-- <meta http-equiv=\"refresh\" content=\"{refresh_seconds}\"> -->
 			<style>
 				body {{
-					margin: auto;
-					width: 50%;
+
+					right: 50%;
+					bottom: 50%;
+					transform: translate(20%,30%);
+					position: absolute;
 				}}
 				li {{
 					list-style: none;
@@ -86,6 +89,7 @@ _ssid_details_header = f"""
 _ssid_details_style = f"""
 	<head>
 		<style>
+			
 			.title2 {{
 				text-align: center;
 				font-size: 30px;
@@ -116,14 +120,27 @@ _ssid_details_style = f"""
 			section .col {{
 				display: table-cell;
 			}}
+			.rowRed {{
+				background: rgb(250, 0, 0, 0.5);
+			}}
+			.rowGreen {{
+				background: rgb(0, 250, 0, 0.5);
+			}}
+			.rowYellow {{
+				background: rgb(255, 255, 0, 0.5);
+			}}
+			
 		</style>
 	</head>
 """
 
 
 def _ssid_details_table_line(ap):
+	print("Se der erro ver se o de baixo dá um número")
+	print(ap.strength[:-1])
+	color = translate_strength_color(int(ap.strength[:-1]))
 	return f"""
-		<div class=\"row\"> 
+		<div class=\"{color}\"> 
 			<div class=\"col\"> <a href=\"/{ap.ssid}/{ap.bssidf}\"> {ap.bssid} </a> </div>
 			<div class=\"col\"> {ap.strength} </div>
 			<div class=\"col\"> {ap.radio_type} </div>
@@ -134,7 +151,7 @@ def _ssid_details_table_line(ap):
 
 _ssid_details_table_header = f"""
 	<header>
-		<div class="col">BSSID</div>
+		<h1 class="col">BSSID</h1>
 		<div class="col">Signal</div>
 		<div class="col">Radio type</div>
 		<div class="col">Channel</div>
@@ -225,19 +242,22 @@ _main_style = f"""
 		</style>
 	</head>
 """
-
-
-def _main_table_line(ap):
+def translate_strength_color(strength):
 	color = ""
-	strength = int(ap.strength[:-1])
+	strength = int(strength)
 	if strength < 40:
 		color = "rowRed"
 	elif strength < 70:
 		color = "rowYellow"
 	else:
 		color = "rowGreen"
+	return color
 
-	return f"""
+
+
+def _main_table_line(ap):
+		color = translate_strength_color(int(ap.strength[:-1]))
+		return f"""
 		<div class=\"{color}\"> 
 			<div class=\"col\"> <a href=\"/{ap.ssid}\"> {ap.ssid} </a> </div>
 			<div class=\"col\"> <a href=\"/{ap.ssid}/{ap.bssidf}\"> {ap.bssid} </a> </div>

@@ -40,9 +40,15 @@ def process(up_ap: WiFiAp):
 
 	# parse SSID
 	match = re.search(r"^SSID +\d+ +: (?P<SSID>[\w-]+)?\s+(?P<remaining>(?:.|\s)*)", raw)
-	ssid = match.group("SSID");
-	ssid = ssid if ssid else "-hidden-"
-	raw = match.group("remaining")
+	# There was a case without match, so I put this conditionally
+	if match is not None:
+		ssid = match.group("SSID");
+		ssid = ssid if ssid else "-hidden-"
+		raw = match.group("remaining")
+	else:
+		ssid = "---"
+		ssid = "---"
+		raw = "---"
 
 	# parse Network type
 	match = re.search(r"^Network type +: (?P<NT>\w+)\s+(?P<remaining>(?:.|\s)*)", raw)
