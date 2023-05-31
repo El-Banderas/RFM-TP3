@@ -1,4 +1,6 @@
 # https://pypi.org/project/simple-http-server/
+import threading
+
 from simple_http_server import server, PathValue, request_map
 import simple_http_server.logger
 import signal
@@ -42,7 +44,7 @@ def process(up_ap: WiFiAp):
 	match = re.search(r"^SSID +\d+ +: (?P<SSID>[\w-]+)?\s+(?P<remaining>(?:.|\s)*)", raw)
 	# There was a case without match, so I put this conditionally
 	if match is not None:
-		ssid = match.group("SSID");
+		ssid = match.group("SSID")
 		ssid = ssid if ssid else "-hidden-"
 		raw = match.group("remaining")
 	else:

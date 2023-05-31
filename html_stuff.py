@@ -10,7 +10,6 @@
 ========================================================================
 """
 
-
 from collections import OrderedDict
 
 
@@ -77,7 +76,6 @@ def render_bssid_details(ap, refresh_seconds):
 ============================  SSID DETAILS  ============================
 ========================================================================
 """
-
 
 _ssid_details_header = f"""
 	<html>
@@ -183,7 +181,6 @@ def render_ssid_details(ssid, aps):
 =====================================================================
 """
 
-
 _main_header = f"""
 	<html>
 		<title>
@@ -242,22 +239,21 @@ _main_style = f"""
 		</style>
 	</head>
 """
+
+
 def translate_strength_color(strength):
-	color = ""
 	strength = int(strength)
 	if strength < 40:
-		color = "rowRed"
+		return "rowRed"
 	elif strength < 70:
-		color = "rowYellow"
+		return "rowYellow"
 	else:
-		color = "rowGreen"
-	return color
-
+		return "rowGreen"
 
 
 def _main_table_line(ap):
-		color = translate_strength_color(int(ap.strength[:-1]))
-		return f"""
+	color = translate_strength_color(int(ap.strength[:-1]))
+	return f"""
 		<div class=\"{color}\"> 
 			<div class=\"col\"> <a href=\"/{ap.ssid}\"> {ap.ssid} </a> </div>
 			<div class=\"col\"> <a href=\"/{ap.ssid}/{ap.bssidf}\"> {ap.bssid} </a> </div>
@@ -286,16 +282,14 @@ def _main_table(access_points):
 	result += " </section>\n"
 	return result
 
+
 # Count the frequency of utilization of channels
-def CountFrequency(my_list):
- 
-    # Creating an empty dictionary
+def _count_frequency(my_list):
+	# Creating an empty dictionary
 	freq = {}
 	for item in my_list:
-		if (item in freq):
-			freq[item] += 1
-		else:
-			freq[item] = 1
+		freq.setdefault(item, 0)
+		freq[item] += 1
 	'''
 	channels = list(freq.keys())
 	channels.sort()
@@ -304,7 +298,7 @@ def CountFrequency(my_list):
 	print("---")
 	sorted_dict = {i: freq[i] for i in channels}
 	'''
-	sorted_dict = OrderedDict(sorted(freq.items())) 
+	sorted_dict = OrderedDict(sorted(freq.items()))
 	res2_4 = []
 	res_5 = []
 	for key, value in sorted_dict.items():
@@ -313,16 +307,15 @@ def CountFrequency(my_list):
 		else:
 			res_5.append({"x": int(key), "y": value})
 
-	#res = (list(sorted_dict.keys()), list(sorted_dict.values()))
-        
+	# res = (list(sorted_dict.keys()), list(sorted_dict.values()))
+
 	return res2_4, res_5
 
-def _main_graph_APS(access_points):
-	used_channels = map(lambda ap: ap.channel,  access_points)
-	freq2_4, freq_5 = CountFrequency(used_channels)
 
+def _main_graph_aps(access_points):
+	used_channels = map(lambda ap: ap.channel, access_points)
+	freq2_4, freq_5 = _count_frequency(used_channels)
 
-		
 	return f"""
 	<div class=\"myGraph\">
 				<div class=\"title3\">Channel utilization:</div>
@@ -332,43 +325,46 @@ def _main_graph_APS(access_points):
 <script>
 
 new Chart(\"myChart\", {{
-  type: \"scatter\",
-  data: {{
-    datasets: [{{
-		 label: \'Freq 2.4GHz\',
-      pointRadius: 4,
-      pointBackgroundColor: \"rgb(0,0,255)\",
-	  backgroundColor: \"rgb(0,0,255)\",
-      data: {freq2_4},
-    }},
-{{
-		 label: \'Freq 5GHz\',
-      pointRadius: 4,
-      pointBackgroundColor: \"rgb(255,0,255)\",
-	  backgroundColor: \"rgb(255,0,255)\",
-      data: {freq_5},
-    }},
-
+	type: \"scatter\",
+	data: {{
+	datasets: [
+		{{
+			label: \'Freq 2.4GHz\',
+			pointRadius: 4,
+			pointBackgroundColor: \"rgb(0,0,255)\",
+			backgroundColor: \"rgb(0,0,255)\",
+			data: {freq2_4},
+		}},
+		{{
+			label: \'Freq 5GHz\',
+			pointRadius: 4,
+			pointBackgroundColor: \"rgb(255,0,255)\",
+			backgroundColor: \"rgb(255,0,255)\",
+			data: {freq_5},
+		}}
 	]
-  }},
-  options: {{
-    legend: {{display: true}},
-
-      scales: {{
-        yAxes: [{{
-            ticks: {{
-                beginAtZero: true
-            }}
-        }}]
-    }}
-  }}
+	}},
+	options: {{
+		legend: {{display: true}},
+		scales: {{
+			yAxes: [
+				{{
+					ticks: {{
+						beginAtZero: true
+					}}
+				}}
+			]
+		}}
+	}}
 }});
 </script>
 
 	</div>"""
 
+
 def _main_body(access_points):
-	return "<body><div class=\"title2\">Current Access Points near you</div>" + _main_table(access_points) + _main_graph_APS(access_points)+ "</body>"
+	return "<body><div class=\"title2\">Current Access Points near you</div>" + _main_table(
+		access_points) + _main_graph_aps(access_points) + "</body>"
 
 
 def render_main_page(available_aps):
