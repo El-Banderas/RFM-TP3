@@ -424,16 +424,18 @@ def _comments(access_points):
 	used_channels = []
 	if (len(access_points)) > 0:
 		if  hasattr(access_points[0], 'channel'): 
+			print("1")
 			used_channels = list(map(lambda ap: int(ap.channel),  access_points))
 			#used_channels_copy = map(lambda ap: int(ap.channel[:-1]),  access_points)
 			
 		else:
+			print("2")
 			used_channels = list(map(lambda ap: int(ap["Signal"][:-1]),  access_points))
 			#used_channels_copy = map(lambda ap: int(ap["Signal"][:-1]),  access_points)
 		
 	else:
 		used_channels = []
-	result = "<div  class=\"MiTable\">" + _more_than_one_AP_in_Channel(used_channels.copy()) + _interference_Channels(used_channels.copy())+ "</div>"
+	result = "<div  class=\"MiTable\">" + _more_than_one_AP_in_Channel(used_channels) + _interference_Channels(used_channels)+ "</div>"
 	return result
 
 def _main_body(access_points):
