@@ -13,13 +13,13 @@
 from collections import OrderedDict
 from collections import Counter
 
+
 def _bssid_details_style(refresh_seconds):
 	return f"""
 		<head>
 			<!-- <meta http-equiv=\"refresh\" content=\"{refresh_seconds}\"> -->
 			<style>
 				body {{
-
 					right: 50%;
 					bottom: 50%;
 					transform: translate(20%,30%);
@@ -242,21 +242,17 @@ _main_style = f"""
 
 
 def translate_strength_color(strength):
-	color = ""
 	strength = int(strength)
 	if strength < 40:
-		color = "rowRed"
+		return "rowRed"
 	elif strength < 70:
-		color = "rowYellow"
+		return "rowYellow"
 	else:
-		color = "rowGreen"
-	return color
-
+		return "rowGreen"
 
 
 def _main_table_line(ap):
-	value = "0%"
-	if  hasattr(ap, 'strength'): 
+	if hasattr(ap, 'strength'):
 		color = translate_strength_color(int(ap.strength[:-1]))
 		value = int(ap.strength[:-1])
 	else:
@@ -304,16 +300,14 @@ def _main_table(access_points):
 	result += " </section>\n"
 	return result
 
+
 # Count the frequency of utilization of channels
-def CountFrequency(my_list):
- 
-    # Creating an empty dictionary
+def _count_frequency(my_list):
+	# Creating an empty dictionary
 	freq = {}
 	for item in my_list:
-		if (item in freq):
-			freq[item] += 1
-		else:
-			freq[item] = 1
+		freq.setdefault(item, 0)
+		freq[item] += 1
 	'''
 	channels = list(freq.keys())
 	channels.sort()
@@ -322,7 +316,7 @@ def CountFrequency(my_list):
 	print("---")
 	sorted_dict = {i: freq[i] for i in channels}
 	'''
-	sorted_dict = OrderedDict(sorted(freq.items())) 
+	sorted_dict = OrderedDict(sorted(freq.items()))
 	res2_4 = []
 	res_5 = []
 	for key, value in sorted_dict.items():
@@ -331,18 +325,18 @@ def CountFrequency(my_list):
 		else:
 			res_5.append({"x": int(key), "y": value})
 
-	#res = (list(sorted_dict.keys()), list(sorted_dict.values()))
-        
+	# res = (list(sorted_dict.keys()), list(sorted_dict.values()))
+
 	return res2_4, res_5
 
-def _main_graph_APS(access_points):
-	used_channels = []
-	if  hasattr(access_points[0], 'strength'): 
-		used_channels = map(lambda ap: ap.channel,  access_points)
+
+def _main_graph_aps(access_points):
+	if hasattr(access_points[0], 'strength'):
+		used_channels = map(lambda ap: ap.channel, access_points)
 	else:
-		used_channels = map(lambda ap: ap["Signal"][:-1],  access_points)
-	freq2_4, freq_5 = CountFrequency(used_channels)
-		
+		used_channels = map(lambda ap: ap["Signal"][:-1], access_points)
+	freq2_4, freq_5 = _count_frequency(used_channels)
+
 	return f"""
 	<div class=\"myGraph\">
 				<div class=\"title3\">Channel utilization:</div>
@@ -387,59 +381,65 @@ def _main_graph_APS(access_points):
 
 	</div>"""
 
+
 """
 ============================  Opinions about AP's and channels  ============================
 """
 
-def _more_than_one_AP_in_Channel(used_channels):
+
+def _more_than_one_ap_in_channel(used_channels):
 	freq_dict = Counter(used_channels)
-	more_than_one_AP = list(filter(lambda ele: freq_dict[ele] > 1, freq_dict))
-	more_than_one_AP.sort()
-	if len(more_than_one_AP) < 1:
+	more_than_one_ap = list(filter(lambda ele: freq_dict[ele] > 1, freq_dict))
+	more_than_one_ap.sort()
+	if len(more_than_one_ap) < 1:
 		return ""
 	result = "Channels shared with two or more AP's:<ul>"
-	more_than_one_AP.sort()
-	for elem in more_than_one_AP:
-		#result += _main_table_line(elem)
+	more_than_one_ap.sort()
+	for elem in more_than_one_ap:
+		# result += _main_table_line(elem)
 		result += f"<li>{elem}</li>"
 	result += " </ul>\n"
 	return result
 
 
-
-def _interference_Channels(used_channels):
+def _interference_channels(used_channels):
 	channels = sorted(set(list(used_channels)))
-	channels_with_interference = list(filter(lambda channel: ((channel+1) in channels) or ((channel-1) in channels), channels)) 
+	channels_with_interference = list(
+		filter(lambda channel: ((channel + 1) in channels) or ((channel - 1) in channels), channels))
 
 	if len(channels_with_interference) < 1:
 		return ""
-	result = "Channels with close neibourghs (the could interfere with each other):<ul>"
+	result = "Channels with close neighbors (these could interfere with each other):<ul>"
 	for elem in channels_with_interference:
-		#result += _main_table_line(elem)
+		# result += _main_table_line(elem)
 		result += f"<li>{elem}</li>"
 	result += " </ul>\n"
 	return result
 
+
 def _comments(access_points):
-	used_channels = []
 	if (len(access_points)) > 0:
-		if  hasattr(access_points[0], 'channel'): 
+		if hasattr(access_points[0], 'channel'):
 			print("1")
-			used_channels = list(map(lambda ap: int(ap.channel),  access_points))
-			#used_channels_copy = map(lambda ap: int(ap.channel[:-1]),  access_points)
-			
+			used_channels = list(map(lambda ap: int(ap.channel), access_points))
+		# used_channels_copy = map(lambda ap: int(ap.channel[:-1]),  access_points)
+
 		else:
 			print("2")
-			used_channels = list(map(lambda ap: int(ap["Signal"][:-1]),  access_points))
-			#used_channels_copy = map(lambda ap: int(ap["Signal"][:-1]),  access_points)
-		
+			used_channels = list(map(lambda ap: int(ap["Signal"][:-1]), access_points))
+		# used_channels_copy = map(lambda ap: int(ap["Signal"][:-1]),  access_points)
+
 	else:
 		used_channels = []
-	result = "<div  class=\"MiTable\">" + _more_than_one_AP_in_Channel(used_channels) + _interference_Channels(used_channels)+ "</div>"
+
+	result = "<div  class=\"MiTable\">" + _more_than_one_ap_in_channel(used_channels) + _interference_channels(
+		used_channels) + "</div>"
 	return result
 
+
 def _main_body(access_points):
-	return "<body><div class=\"title2\">Current Access Points near you</div>" + _main_table(access_points) + _main_graph_APS(access_points.copy())+ _comments(access_points) +"</body>"
+	return "<body><div class=\"title2\">Current Access Points near you</div>" + _main_table(
+		access_points) + _main_graph_aps(access_points.copy()) + _comments(access_points) + "</body>"
 
 
 def render_main_page(available_aps):
