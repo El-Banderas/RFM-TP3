@@ -11,8 +11,8 @@ class AccessPoint:
 
 		self.radio_type = kwargs["Radio type"]
 		self.channel = kwargs["Channel"]
-		self.basic_rates = kwargs["Basic Rates (Mbps)"]
-		self.other_rates = kwargs["Other Rates (Mbps)"]
+		#self.basic_rates = kwargs["Basic Rates (Mbps)"]
+		#self.other_rates = kwargs["Other Rates (Mbps)"]
 
 	def __dict__(self):
 		return {
@@ -24,6 +24,6 @@ class AccessPoint:
 			"Signal": self.strength,
 			"Radio type": self.radio_type,
 			"Channel": self.channel,
-			"Basic Rates (Mbps)": self.basic_rates,
-			"Other Rates (Mbps)": self.other_rates,
+			#"Basic Rates (Mbps)": self.basic_rates,
+			#"Other Rates (Mbps)": self.other_rates,
 		}
